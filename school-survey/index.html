@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Admission Form</title>
+</head>
+<body>
+    <h2>School Admission Form</h2>
+    <form id="admissionForm">
+        <label>Name:</label>
+        <input type="text" id="name" required><br><br>
+        
+        <label>Age:</label>
+        <input type="number" id="age" required><br><br>
+        
+        <label>Grade:</label>
+        <input type="text" id="grade" required><br><br>
+        
+        <label>Parent Contact:</label>
+        <input type="text" id="parentContact" required><br><br>
+        
+        <label>Reason for Admission:</label>
+        <textarea id="reasonForAdmission" required></textarea><br><br>
+        
+        <button type="submit">Submit</button>
+    </form>
+
+    <h2>Admissions List</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Age</th>
+                <th>Grade</th>
+                <th>Parent Contact</th>
+                <th>Reason for Admission</th>
+            </tr>
+        </thead>
+        <tbody id="admissionsTable">
+        </tbody>
+    </table>
+
+    <script>
+        // Fetch and display admissions
+        function fetchAdmissions() {
+            fetch("http://localhost:5000/admissions")
+            .then(response => response.json())
+            .then(data => {
+                let tableBody = document.getElementById("admissionsTable");
+                tableBody.innerHTML = ""; // Clear previous data
+                data.forEach(admission => {
+                    let row = `<tr>
+                        <td>${admission.id}</td>
+                        <td>${admission.name}</td>
+                        <td>${admission.age}</td>
+                        <td>${admission.grade}</td>
+                        <td>${admission.parentContact}</td>
+                        <td>${admission.reasonForAdmission}</td>
+                    </tr>`;
+                    tableBody.innerHTML += row;
+                });
+            })
+            .catch(error => console.error("Error fetching data:", error));
+        }
+
+        // Submit form data
+        document.getElementById("admissionForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            let admissionData = {
+                name: document.getElementById("name").value,
+                age: document.getElementById("age").value,
+                grade: document.getElementById("grade").value,
+                parentContact: document.getElementById("parentContact").value,
+                reasonForAdmission: document.getElementById("reasonForAdmission").value
+            };
+
+            fetch("http://localhost:5000/submit-admission", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(admissionData)
+            })
+            .then(response => response.json())
+            .then(result => {
+                alert(result.message);
+                fetchAdmissions(); // Refresh table after submission
+                document.getElementById("admissionForm").reset(); // Clear form
+            })
+            .catch(error => console.error("Error submitting data:", error));
+        });
+
+        // Fetch admissions when the page loads
+        fetchAdmissions();
+    </script>
+</body>
+</html>
